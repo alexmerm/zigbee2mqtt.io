@@ -18,7 +18,10 @@ description: "Integrate your TuYa TS011F_socket_module via Zigbee2MQTT with what
 
 ## Notes
 
-None
+
+### Pairing
+Press the black pairing button on the relay module for 5 seconds until the indicator light flashes, then release the pairing button.
+
 
 
 ## Exposes
@@ -55,8 +58,8 @@ sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "lqi"
     value_template: "{{ value_json.linkquality }}"
+    unit_of_measurement: "lqi"
     icon: "mdi:signal"
 ```
 {% endraw %}

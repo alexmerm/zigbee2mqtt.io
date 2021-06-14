@@ -11,8 +11,8 @@ description: "Integrate your Gledopto GL-C-007-2ID via Zigbee2MQTT with whatever
 
 | Model | GL-C-007-2ID  |
 | Vendor  | Gledopto  |
-| Description | Zigbee LED controller RGBW (2 ID) |
-| Exposes | light (state, brightness, color_temp, color_xy), light (state, brightness), linkquality |
+| Description | Zigbee LED Controller RGBW (2 ID) |
+| Exposes | light (state, brightness, color_temp, color_temp_startup, color_xy), light (state, brightness), linkquality |
 | Picture | ![Gledopto GL-C-007-2ID](../images/devices/GL-C-007-2ID.jpg) |
 
 ## Notes
@@ -26,6 +26,10 @@ description: "Integrate your Gledopto GL-C-007-2ID via Zigbee2MQTT with whatever
 
 ### Device type specific configuration
 *[How to use device type specific configuration](../information/configuration.md)*
+
+* `color_sync`: Synchronizes the color values in the state, e.g. if the state contains `color_temp` and `color.xy` and
+the `color_temp` is set, `color.xy` will be updated to match the `color_temp`. (default: `true`)
+
 
 * `transition`: Controls the transition time (in seconds) of on/off, brightness,
 color temperature (if applicable) and color (if applicable) changes. Defaults to `0` (no transition).
@@ -46,13 +50,13 @@ rendition to other lights. Provide a minimum of 2 data sets in the correction ma
     ```yaml
     hue_correction:
         - in: 28
-            out: 45
+          out: 45
         - in: 89
-            out: 109
+          out: 109
         - in: 184
-            out: 203
+          out: 203
         - in: 334
-            out: 318
+          out: 318
     ```
 
 
@@ -60,10 +64,11 @@ rendition to other lights. Provide a minimum of 2 data sets in the correction ma
 ## Exposes
 
 ### Light (rgb endpoint)
-This light supports the following features: `state`, `brightness`, `color_temp`, `color_xy`.
+This light supports the following features: `state`, `brightness`, `color_temp`, `color_temp_startup`, `color_xy`.
 - `state`: To control the state publish a message to topic `zigbee2mqtt/FRIENDLY_NAME/set` with payload `{"state_rgb": "ON"}`, `{"state_rgb": "OFF"}` or `{"state_rgb": "TOGGLE"}`. To read the state send a message to `zigbee2mqtt/FRIENDLY_NAME/get` with payload `{"state_rgb": ""}`.
 - `brightness`: To control the brightness publish a message to topic `zigbee2mqtt/FRIENDLY_NAME/set` with payload `{"brightness_rgb": VALUE}` where `VALUE` is a number between `0` and `254`. To read the brightness send a message to `zigbee2mqtt/FRIENDLY_NAME/get` with payload `{"brightness_rgb": ""}`.
-- `color_temp`: To control the color temperature (in reciprocal megakelvin a.k.a. mired scale) publish a message to topic `zigbee2mqtt/FRIENDLY_NAME/set` with payload `{"color_temp_rgb": VALUE}` where `VALUE` is a number between `150` and `500`, the higher the warmer the color. To read the color temperature send a message to `zigbee2mqtt/FRIENDLY_NAME/get` with payload `{"color_temp_rgb": ""}`.
+- `color_temp`: To control the color temperature (in reciprocal megakelvin a.k.a. mired scale) publish a message to topic `zigbee2mqtt/FRIENDLY_NAME/set` with payload `{"color_temp_rgb": VALUE}` where `VALUE` is a number between `150` and `500`, the higher the warmer the color. To read the color temperature send a message to `zigbee2mqtt/FRIENDLY_NAME/get` with payload `{"color_temp_rgb": ""}`. Besides the numeric values the following values are accepected: `coolest`, `cool`, `neutral`, `warm`, `warmest`.
+- `color_temp_startup`: To set the startup color temperature (in reciprocal megakelvin a.k.a. mired scale) publish a message to topic `zigbee2mqtt/FRIENDLY_NAME/set` with payload `{"color_temp_startup_rgb": VALUE}` where `VALUE` is a number between `150` and `500`, the higher the warmer the color. To read the startup color temperature send a message to `zigbee2mqtt/FRIENDLY_NAME/get` with payload `{"color_temp_startup_rgb": ""}`. Besides the numeric values the following values are accepected: `coolest`, `cool`, `neutral`, `warm`, `warmest`, `previous`.
 - `color_xy`: To control the XY color (CIE 1931 color space) publish a message to topic `zigbee2mqtt/FRIENDLY_NAME/set` with payload `{"color_rgb": {"x": X_VALUE, "y": Y_VALUE}}` (e.g. `{"color":{"x":0.123,"y":0.123}}`). To read the XY color send a message to `zigbee2mqtt/FRIENDLY_NAME/get` with payload `{"color_rgb":{"x":"","y":""}}`. Alternatively it is possible to set the XY color via RGB:
   - `{"color": {"r": R, "g": G, "b": B}}` e.g. `{"color":{"r":46,"g":102,"b":150}}`
   - `{"color": {"rgb": "R,G,B"}}` e.g. `{"color":{"rgb":"46,102,150"}}`
@@ -71,7 +76,7 @@ This light supports the following features: `state`, `brightness`, `color_temp`,
 
 #### Transition
 For all of the above mentioned features it is possible to do a transition of the value over time. To do this add an additional property `transition` to the payload which is the transition time in seconds.
-Examples: `{"brightness":156,"transition":3}`, `{"color_temp":241,"transition":0.5}`.
+Examples: `{"brightness":156,"transition":3}`, `{"color_temp":241,"transition":1}`.
 
 #### Moving/stepping
 Instead of setting a value (e.g. brightness) directly it is also possible to:
@@ -100,7 +105,7 @@ This light supports the following features: `state`, `brightness`.
 
 #### Transition
 For all of the above mentioned features it is possible to do a transition of the value over time. To do this add an additional property `transition` to the payload which is the transition time in seconds.
-Examples: `{"brightness":156,"transition":3}`, `{"color_temp":241,"transition":0.5}`.
+Examples: `{"brightness":156,"transition":3}`, `{"color_temp":241,"transition":1}`.
 
 #### Moving/stepping
 Instead of setting a value (e.g. brightness) directly it is also possible to:
@@ -138,22 +143,22 @@ light:
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
     brightness: true
-    color_temp: true
-    xy: true
-    hs: false
     schema: "json"
     command_topic: "zigbee2mqtt/<FRIENDLY_NAME>/rgb/set"
     brightness_scale: 254
     state_topic_postfix: "rgb"
+    color_mode: true
+    supported_color_modes: 
+      - "xy"
+      - "color_temp"
+    max_mireds: 500
+    min_mireds: 150
 
 light:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
     brightness: true
-    color_temp: false
-    xy: false
-    hs: false
     schema: "json"
     command_topic: "zigbee2mqtt/<FRIENDLY_NAME>/white/set"
     brightness_scale: 254
@@ -163,8 +168,8 @@ sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "lqi"
     value_template: "{{ value_json.linkquality }}"
+    unit_of_measurement: "lqi"
     icon: "mdi:signal"
 ```
 {% endraw %}

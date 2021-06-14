@@ -14,7 +14,7 @@ description: "Integrate your Nue / 3A HGZB-01 via Zigbee2MQTT with whatever smar
 | Description | Smart Zigbee 3.0 light controller |
 | Exposes | switch (state), linkquality |
 | Picture | ![Nue / 3A HGZB-01](../images/devices/HGZB-01.jpg) |
-| White-label | Zemismart ZW-EU-01 |
+| White-label | Zemismart ZW-EU-01, Moes ZK-CH-2U |
 
 ## Notes
 
@@ -55,8 +55,8 @@ sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "lqi"
     value_template: "{{ value_json.linkquality }}"
+    unit_of_measurement: "lqi"
     icon: "mdi:signal"
 ```
 {% endraw %}

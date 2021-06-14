@@ -1,7 +1,7 @@
 ---
 ---
 # Binding
-*Ongoing discussion about this feature can be found here: <https://github.com/Koenkk/zigbee2mqtt/issues/782>*
+*An ongoing discussion about this feature can be found here: [#782](https://github.com/Koenkk/zigbee2mqtt/issues/782)*
 
 Zigbee has support for binding which makes it possible that devices can directly control each other without the intervention of Zigbee2MQTT or any home automation software.
 
@@ -14,6 +14,8 @@ A use case for this is e.g. the TRADFRI wireless dimmer. Binding the dimmer dire
 Binding can be configured by using either `zigbee2mqtt/bridge/request/device/bind` to bind and `zigbee2mqtt/bridge/request/device/unbind` to unbind. The payload should be `{"from": SOURCE, "to": TARGET}` where `SOURCE` and `TARGET` can be the `friendly_name` of a group or device. Example request payload: `{"from": "my_remote", "to": "my_bulb"}`, example response payload: `{"data":{"from":"my_remote","to":"my_bulb","clusters":["genScenes","genOnOff","genLevelCtrl"],"failed":[]},"status":"ok"}`. The `clusters` in the response indicate the bound/unbound clusters, `failed` indicates any failed to bind/unbind clusters. In case all clusters fail to bind the `status` is set to `error`.
 
 By default all supported clusters are bound. To restrict which clusters are being bound/unbound add `clusters` to the request payload e.g. `{"from": "my_remote", "to": "my_bulb", "clusters": ["genOnOff"]}`. Possible clusters are: `genScenes`, `genOnOff`, `genLevelCtrl`, `lightingColorCtrl` and `closuresWindowCovering`.
+
+When binding reporting is setup on the target device. This makes the target device update their state when it is changed by the source of the bind. When unbinding this reporting is removed again, if you want to skip this use `skip_disable_reporting` (e.g. `{"from": "my_remote", "to": "my_bulb", "skip_disable_reporting": true}`).
 
 When binding/unbinding of a battery powered device fails, this is most of the time caused becuase the device is sleeping. This can be fixed by waking it up right before sending the MQTT message. To wake it up press a button on the remote.
 
@@ -42,5 +44,24 @@ To do this execute the following steps:
 ## Devices
 Not all devices support this, it basically comes down to the Zigbee implementation of the device itself. Check the device specific page for more info (can be reached via the supported devices page)
 
-## Report
-When using this feature you are probably also interested in using the report feature. This allows you to get state changes when e.g. a bulb state changes by a bound dimmer. Read more about it here [Report](./report.md).
+## State changes
+When a devices is being bound to, Zigbee2MQTT will automatically configure reporting for these devices. This will make the device report state changes when the state is changed through a bound device.
+
+In order for this feature to work, the device has to support it. As devices from the same manufacturer (mostly) have the same features the table below might help to find out if your device supports it.
+
+| Brand           | On/Off    | Brightness | Color | Color temperature |
+| :---            | :---:     | :---:      | :---: | :---:             |
+| Philips Hue     | N(1)      | N(2)       | N     | N                 |
+| Trådfri(3)      | Y         | Y          | Y     | N                 |
+| Innr            | Y         | Y          | Y     | Y                 |
+| GLEDOPTO        | N         | N          | N     | N                 |
+| OSRAM           | Y         | Y          | N     | N                 |
+| Müller Licht    | N         | N          | N     | N                 |
+
+1. Bulbs on old firmware (date 20170908 or older) do report On/Off
+2. Zigbee2MQTT will manual poll for change if a binding updates the bulb.
+3. The color/brightness of a Trådfri bulb can be changed while the state=off, it also reports back the change.
+
+If your devices do **not** support reporting put the device in a group and bind the remote to the group instead of directly to the device. This will make Zigbee2MQTT poll the device for updates when the bound remote controls the device. To minimize traffic this has not been enabled for all devices. If this does not work please create an issue for it [here](https://github.com/Koenkk/zigbee2mqtt/issues).
+
+**NOTE:** Any manual setup reportings of the clusters `genOnOff`, `genLevelCtrl` `lightingColorCtrl` and `closuresWindowCovering` will be removed if there are no binds to the device or group a device is in when unbinding. You have to setup these reportings again.

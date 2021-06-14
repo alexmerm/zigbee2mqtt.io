@@ -18,7 +18,7 @@ description: "Integrate your Dawon DNS PM-S240-ZB via Zigbee2MQTT with whatever 
 ## Notes
 
 
-### Routing functionallity
+### Routing functionality
 This device does **not** act as a router.
 
 
@@ -71,8 +71,8 @@ sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "lqi"
     value_template: "{{ value_json.linkquality }}"
+    unit_of_measurement: "lqi"
     icon: "mdi:signal"
 ```
 {% endraw %}

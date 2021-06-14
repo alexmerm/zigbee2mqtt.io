@@ -35,7 +35,7 @@ This light supports the following features: `state`, `brightness`.
 
 #### Transition
 For all of the above mentioned features it is possible to do a transition of the value over time. To do this add an additional property `transition` to the payload which is the transition time in seconds.
-Examples: `{"brightness":156,"transition":3}`, `{"color_temp":241,"transition":0.5}`.
+Examples: `{"brightness":156,"transition":3}`, `{"color_temp":241,"transition":1}`.
 
 #### Moving/stepping
 Instead of setting a value (e.g. brightness) directly it is also possible to:
@@ -61,7 +61,7 @@ This light supports the following features: `state`, `brightness`.
 
 #### Transition
 For all of the above mentioned features it is possible to do a transition of the value over time. To do this add an additional property `transition` to the payload which is the transition time in seconds.
-Examples: `{"brightness":156,"transition":3}`, `{"color_temp":241,"transition":0.5}`.
+Examples: `{"brightness":156,"transition":3}`, `{"color_temp":241,"transition":1}`.
 
 #### Moving/stepping
 Instead of setting a value (e.g. brightness) directly it is also possible to:
@@ -99,9 +99,6 @@ light:
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
     brightness: true
-    color_temp: false
-    xy: false
-    hs: false
     schema: "json"
     command_topic: "zigbee2mqtt/<FRIENDLY_NAME>/l1/set"
     brightness_scale: 254
@@ -112,9 +109,6 @@ light:
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
     brightness: true
-    color_temp: false
-    xy: false
-    hs: false
     schema: "json"
     command_topic: "zigbee2mqtt/<FRIENDLY_NAME>/l2/set"
     brightness_scale: 254
@@ -124,8 +118,8 @@ sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "lqi"
     value_template: "{{ value_json.linkquality }}"
+    unit_of_measurement: "lqi"
     icon: "mdi:signal"
 ```
 {% endraw %}

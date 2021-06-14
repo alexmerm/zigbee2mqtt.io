@@ -12,7 +12,7 @@ description: "Integrate your TuYa TS0601_dimmer via Zigbee2MQTT with whatever sm
 | Model | TS0601_dimmer  |
 | Vendor  | TuYa  |
 | Description | Zigbee smart dimmer |
-| Exposes | light (state, brightness), effect, linkquality |
+| Exposes | light (state, brightness), linkquality |
 | Picture | ![TuYa TS0601_dimmer](../images/devices/TS0601_dimmer.jpg) |
 | White-label | Larkkey ZSTY-SM-1DMZG-EU, Earda EDM-1ZAA-EU, Earda EDM-1ZAB-EU, Earda EDM-1ZBA-EU |
 
@@ -36,7 +36,7 @@ This light supports the following features: `state`, `brightness`.
 
 #### Transition
 For all of the above mentioned features it is possible to do a transition of the value over time. To do this add an additional property `transition` to the payload which is the transition time in seconds.
-Examples: `{"brightness":156,"transition":3}`, `{"color_temp":241,"transition":0.5}`.
+Examples: `{"brightness":156,"transition":3}`, `{"color_temp":241,"transition":1}`.
 
 #### Moving/stepping
 Instead of setting a value (e.g. brightness) directly it is also possible to:
@@ -54,13 +54,6 @@ To do this send a payload like below to `zigbee2mqtt/FRIENDLY_NAME/set`
   "brightness_step": 40 // Increases brightness by 40
 }
 ````
-
-### Effect (enum)
-Triggers an effect on the light (e.g. make light blink for a few seconds).
-Value will **not** be published in the state.
-It's not possible to read (`/get`) this value.
-To write (`/set`) a value publish a message to topic `zigbee2mqtt/FRIENDLY_NAME/set` with payload `{"effect": NEW_VALUE}`.
-The possible values are: `blink`, `breathe`, `okay`, `channel_change`, `finish_effect`, `stop_effect`.
 
 ### Linkquality (numeric)
 Link quality (signal strength).
@@ -81,27 +74,16 @@ light:
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
     brightness: true
-    color_temp: false
-    xy: false
-    hs: false
     schema: "json"
     command_topic: "zigbee2mqtt/<FRIENDLY_NAME>/set"
     brightness_scale: 254
-    effect: true
-    effect_list: 
-      - "blink"
-      - "breathe"
-      - "okay"
-      - "channel_change"
-      - "finish_effect"
-      - "stop_effect"
 
 sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "lqi"
     value_template: "{{ value_json.linkquality }}"
+    unit_of_measurement: "lqi"
     icon: "mdi:signal"
 ```
 {% endraw %}

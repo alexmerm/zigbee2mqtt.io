@@ -12,7 +12,7 @@ description: "Integrate your Xiaomi SJCGQ11LM via Zigbee2MQTT with whatever smar
 | Model | SJCGQ11LM  |
 | Vendor  | Xiaomi  |
 | Description | Aqara water leak sensor |
-| Exposes | battery, water_leak, battery_low, tamper, linkquality |
+| Exposes | battery, water_leak, battery_low, voltage, linkquality |
 | Picture | ![Xiaomi SJCGQ11LM](../images/devices/SJCGQ11LM.jpg) |
 
 ## Notes
@@ -45,11 +45,11 @@ Value can be found in the published state on the `battery_low` property.
 It's not possible to read (`/get`) or write (`/set`) this value.
 If value equals `true` battery_low is ON, if `false` OFF.
 
-### Tamper (binary)
-Indicates whether the device is tampered.
-Value can be found in the published state on the `tamper` property.
+### Voltage (numeric)
+Voltage of the battery in millivolts.
+Value can be found in the published state on the `voltage` property.
 It's not possible to read (`/get`) or write (`/set`) this value.
-If value equals `true` tamper is ON, if `false` OFF.
+The unit of this value is `mV`.
 
 ### Linkquality (numeric)
 Link quality (signal strength).
@@ -69,8 +69,8 @@ sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "%"
     value_template: "{{ value_json.battery }}"
+    unit_of_measurement: "%"
     device_class: "battery"
 
 binary_sensor:
@@ -91,20 +91,20 @@ binary_sensor:
     payload_off: false
     device_class: "battery"
 
-binary_sensor:
+sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    value_template: "{{ value_json.tamper }}"
-    payload_on: true
-    payload_off: false
+    value_template: "{{ value_json.voltage }}"
+    unit_of_measurement: "mV"
+    device_class: "voltage"
 
 sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "lqi"
     value_template: "{{ value_json.linkquality }}"
+    unit_of_measurement: "lqi"
     icon: "mdi:signal"
 ```
 {% endraw %}

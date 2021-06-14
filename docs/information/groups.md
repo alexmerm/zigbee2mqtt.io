@@ -1,7 +1,7 @@
 ---
 ---
 # Groups
-*Ongoing discussion can be found here: https://github.com/Koenkk/zigbee2mqtt/issues/764*
+*Ongoing discussion can be found here: [#764](https://github.com/Koenkk/zigbee2mqtt/issues/764)*
 
 Zigbee2MQTT has support for Zigbee groups. By using Zigbee groups you can control multiple devices simultaneously with one command.
 
@@ -21,10 +21,10 @@ groups:
     # Optional: Change group state when one of the devices in it changes state, see 'State changes' below (default: true)
     optimistic: true
     # Optional: Devices of this group,
-    # Note: this has to be the ieeeAddr of the device, not the friendly_name! (default: empty)
+    # Note: This can be the ieeeAddr of the device or the friendly_name (default: empty)
     devices:
       - '0x00158d00018255df'
-      - '0x00269a02031469ab'
+      - 'some_device_friendly_name'
 ```
 
 The groupID (in the above example `'1'`) should be a numerical string. In case you want to use a hexadecimal groupID (e.g. `0xe24c`) you should first convert it to a numerical string (e.g. `57932`).
@@ -38,6 +38,8 @@ Devices can also be added/removed from groups via MQTT, the possible topics are:
 - `zigbee2mqtt/bridge/request/group/members/remove_all` remove a device from all groups
 
 The payload should be `{"group": GROUP, "device": DEVICE}` where `GROUP` is the `friendly_name` of the group you want to add/remove the device from, `DEVICE` is the `friendly_name` of the device you want to add/remove from the group. Example payload: `{"group":"my_group","device":"my_bulb"}`, example response: `{"data":{"device":"my_bulb","group":"my_group"},"status":"ok"}`. In case of executing a `remove_all` the `group` propert in the request can be omitted.
+
+When removing a device from a group and when the group has any devices bound to it. The reporting of this members will be disabled, if you want to skip this use `skip_disable_reporting` (e.g. `{"group":"my_group","device":"my_bulb", "skip_disable_reporting": true}`).
 
 ## Controlling
 Controlling a group is similar to controlling a single device. For example to turn on all devices that are part of group send a MQTT message to `zigbee2mqtt/[GROUP_FRIENDLY_NAME]/set` with payload:

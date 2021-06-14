@@ -19,7 +19,9 @@ description: "Integrate your Xiaomi ZNCLDJ11LM via Zigbee2MQTT with whatever sma
 
 
 ### Pairing
-Hold button for a few seconds until red light turn on.
+Hold button for about 5 seconds until blue light turn on.
+
+If you need to reset device first, hold button longer until red light turn on.
 
 ### Device type specific configuration
 *[How to use device type specific configuration](../information/configuration.md)*
@@ -76,6 +78,9 @@ Home Assistant automation example:
 Motor leaves calibration mode automatically after it reaches the both open and close curtain position limits. Calibration is mandatory for proper position reporting and ability to set intermediate positions.
 
 
+## OTA updates
+This device supports OTA updates, for more information see [OTA updates](../information/ota_updates.md).
+
 
 ## Exposes
 
@@ -103,7 +108,7 @@ cover:
   - platform: "mqtt"
     availability_topic: "zigbee2mqtt/bridge/state"
     command_topic: "zigbee2mqtt/<FRIENDLY_NAME>/set"
-    value_template: "{{ value_json.position }}"
+    position_template: "{{ value_json.position }}"
     set_position_template: "{ \"position\": {{ position }} }"
     set_position_topic: "zigbee2mqtt/<FRIENDLY_NAME>/set"
     position_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
@@ -112,9 +117,24 @@ sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "lqi"
     value_template: "{{ value_json.linkquality }}"
+    unit_of_measurement: "lqi"
     icon: "mdi:signal"
+
+sensor:
+  - platform: "mqtt"
+    state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
+    availability_topic: "zigbee2mqtt/bridge/state"
+    icon: "mdi:update"
+    value_template: "{{ value_json['update']['state'] }}"
+
+binary_sensor:
+  - platform: "mqtt"
+    state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
+    availability_topic: "zigbee2mqtt/bridge/state"
+    payload_on: true
+    payload_off: false
+    value_template: "{{ value_json.update_available}}"
 ```
 {% endraw %}
 

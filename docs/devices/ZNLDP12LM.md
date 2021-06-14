@@ -12,7 +12,7 @@ description: "Integrate your Xiaomi ZNLDP12LM via Zigbee2MQTT with whatever smar
 | Model | ZNLDP12LM  |
 | Vendor  | Xiaomi  |
 | Description | Aqara smart LED bulb |
-| Exposes | light (state, brightness, color_temp), effect, linkquality |
+| Exposes | light (state, brightness, color_temp), effect, power_outage_memory, linkquality |
 | Picture | ![Xiaomi ZNLDP12LM](../images/devices/ZNLDP12LM.jpg) |
 
 ## Notes
@@ -24,10 +24,17 @@ Switch the lamp on five times until the bulb blinks several times.
 ### Device type specific configuration
 *[How to use device type specific configuration](../information/configuration.md)*
 
+* `color_sync`: Synchronizes the color values in the state, e.g. if the state contains `color_temp` and `color.xy` and
+the `color_temp` is set, `color.xy` will be updated to match the `color_temp`. (default: `true`)
+
+
 * `transition`: Controls the transition time (in seconds) of on/off, brightness,
 color temperature (if applicable) and color (if applicable) changes. Defaults to `0` (no transition).
 Note that this value is overridden if a `transition` value is present in the MQTT command payload.
 
+
+## OTA updates
+This device supports OTA updates, for more information see [OTA updates](../information/ota_updates.md).
 
 
 ## Exposes
@@ -36,11 +43,11 @@ Note that this value is overridden if a `transition` value is present in the MQT
 This light supports the following features: `state`, `brightness`, `color_temp`.
 - `state`: To control the state publish a message to topic `zigbee2mqtt/FRIENDLY_NAME/set` with payload `{"state": "ON"}`, `{"state": "OFF"}` or `{"state": "TOGGLE"}`. To read the state send a message to `zigbee2mqtt/FRIENDLY_NAME/get` with payload `{"state": ""}`.
 - `brightness`: To control the brightness publish a message to topic `zigbee2mqtt/FRIENDLY_NAME/set` with payload `{"brightness": VALUE}` where `VALUE` is a number between `0` and `254`. To read the brightness send a message to `zigbee2mqtt/FRIENDLY_NAME/get` with payload `{"brightness": ""}`.
-- `color_temp`: To control the color temperature (in reciprocal megakelvin a.k.a. mired scale) publish a message to topic `zigbee2mqtt/FRIENDLY_NAME/set` with payload `{"color_temp": VALUE}` where `VALUE` is a number between `150` and `500`, the higher the warmer the color. To read the color temperature send a message to `zigbee2mqtt/FRIENDLY_NAME/get` with payload `{"color_temp": ""}`.
+- `color_temp`: To control the color temperature (in reciprocal megakelvin a.k.a. mired scale) publish a message to topic `zigbee2mqtt/FRIENDLY_NAME/set` with payload `{"color_temp": VALUE}` where `VALUE` is a number between `150` and `500`, the higher the warmer the color. To read the color temperature send a message to `zigbee2mqtt/FRIENDLY_NAME/get` with payload `{"color_temp": ""}`. Besides the numeric values the following values are accepected: `coolest`, `cool`, `neutral`, `warm`, `warmest`.
 
 #### Transition
 For all of the above mentioned features it is possible to do a transition of the value over time. To do this add an additional property `transition` to the payload which is the transition time in seconds.
-Examples: `{"brightness":156,"transition":3}`, `{"color_temp":241,"transition":0.5}`.
+Examples: `{"brightness":156,"transition":3}`, `{"color_temp":241,"transition":1}`.
 
 #### Moving/stepping
 Instead of setting a value (e.g. brightness) directly it is also possible to:
@@ -69,6 +76,13 @@ It's not possible to read (`/get`) this value.
 To write (`/set`) a value publish a message to topic `zigbee2mqtt/FRIENDLY_NAME/set` with payload `{"effect": NEW_VALUE}`.
 The possible values are: `blink`, `breathe`, `okay`, `channel_change`, `finish_effect`, `stop_effect`.
 
+### Power_outage_memory (binary)
+Enable/disable the power outage memory, this recovers the on/off mode after power failure.
+Value can be found in the published state on the `power_outage_memory` property.
+It's not possible to read (`/get`) this value.
+To write (`/set`) a value publish a message to topic `zigbee2mqtt/FRIENDLY_NAME/set` with payload `{"power_outage_memory": NEW_VALUE}`.
+If value equals `true` power_outage_memory is ON, if `false` OFF.
+
 ### Linkquality (numeric)
 Link quality (signal strength).
 Value can be found in the published state on the `linkquality` property.
@@ -88,12 +102,14 @@ light:
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
     brightness: true
-    color_temp: true
-    xy: false
-    hs: false
     schema: "json"
     command_topic: "zigbee2mqtt/<FRIENDLY_NAME>/set"
     brightness_scale: 254
+    color_mode: true
+    supported_color_modes: 
+      - "color_temp"
+    max_mireds: 500
+    min_mireds: 150
     effect: true
     effect_list: 
       - "blink"
@@ -103,13 +119,36 @@ light:
       - "finish_effect"
       - "stop_effect"
 
+binary_sensor:
+  - platform: "mqtt"
+    state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
+    availability_topic: "zigbee2mqtt/bridge/state"
+    value_template: "{{ value_json.power_outage_memory }}"
+    payload_on: true
+    payload_off: false
+
 sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "lqi"
     value_template: "{{ value_json.linkquality }}"
+    unit_of_measurement: "lqi"
     icon: "mdi:signal"
+
+sensor:
+  - platform: "mqtt"
+    state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
+    availability_topic: "zigbee2mqtt/bridge/state"
+    icon: "mdi:update"
+    value_template: "{{ value_json['update']['state'] }}"
+
+binary_sensor:
+  - platform: "mqtt"
+    state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
+    availability_topic: "zigbee2mqtt/bridge/state"
+    payload_on: true
+    payload_off: false
+    value_template: "{{ value_json.update_available}}"
 ```
 {% endraw %}
 

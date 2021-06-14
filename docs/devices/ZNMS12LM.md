@@ -12,7 +12,7 @@ description: "Integrate your Xiaomi ZNMS12LM via Zigbee2MQTT with whatever smart
 | Model | ZNMS12LM  |
 | Vendor  | Xiaomi  |
 | Description | Aqara S2 lock |
-| Exposes | battery, battery_low, state, reverse, action, linkquality |
+| Exposes | battery, voltage, battery_low, state, reverse, action, linkquality |
 | Picture | ![Xiaomi ZNMS12LM](../images/devices/ZNMS12LM.jpg) |
 
 ## Notes
@@ -23,6 +23,9 @@ description: "Integrate your Xiaomi ZNMS12LM via Zigbee2MQTT with whatever smart
 * `legacy`: Set to `false` to disable the legacy integration (highly recommended!) (default: true)
 
 
+## OTA updates
+This device supports OTA updates, for more information see [OTA updates](../information/ota_updates.md).
+
 
 ## Exposes
 
@@ -32,6 +35,12 @@ Value can be found in the published state on the `battery` property.
 It's not possible to read (`/get`) or write (`/set`) this value.
 The minimal value is `0` and the maximum value is `100`.
 The unit of this value is `%`.
+
+### Voltage (numeric)
+Voltage of the battery in millivolts.
+Value can be found in the published state on the `voltage` property.
+It's not possible to read (`/get`) or write (`/set`) this value.
+The unit of this value is `mV`.
 
 ### Battery_low (binary)
 Indicates if the battery of this device is almost empty.
@@ -72,9 +81,17 @@ sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "%"
     value_template: "{{ value_json.battery }}"
+    unit_of_measurement: "%"
     device_class: "battery"
+
+sensor:
+  - platform: "mqtt"
+    state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
+    availability_topic: "zigbee2mqtt/bridge/state"
+    value_template: "{{ value_json.voltage }}"
+    unit_of_measurement: "mV"
+    device_class: "voltage"
 
 binary_sensor:
   - platform: "mqtt"
@@ -112,9 +129,24 @@ sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "lqi"
     value_template: "{{ value_json.linkquality }}"
+    unit_of_measurement: "lqi"
     icon: "mdi:signal"
+
+sensor:
+  - platform: "mqtt"
+    state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
+    availability_topic: "zigbee2mqtt/bridge/state"
+    icon: "mdi:update"
+    value_template: "{{ value_json['update']['state'] }}"
+
+binary_sensor:
+  - platform: "mqtt"
+    state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
+    availability_topic: "zigbee2mqtt/bridge/state"
+    payload_on: true
+    payload_off: false
+    value_template: "{{ value_json.update_available}}"
 ```
 {% endraw %}
 

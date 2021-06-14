@@ -34,7 +34,7 @@ Open source firmware can be found here: [Github](https://github.com/diyruz/freep
 ### How to use touch link
 1. Bring you remote near to TL device
 2. Hold button (2) for 5 seconds
-TL funtionality can work without connecting to network
+TL functionality can work without connecting to network
 
 
 
@@ -311,8 +311,8 @@ sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "%"
     value_template: "{{ value_json.battery }}"
+    unit_of_measurement: "%"
     device_class: "battery"
 
 sensor:
@@ -566,8 +566,8 @@ sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "lqi"
     value_template: "{{ value_json.linkquality }}"
+    unit_of_measurement: "lqi"
     icon: "mdi:signal"
 ```
 {% endraw %}

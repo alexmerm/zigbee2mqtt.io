@@ -27,9 +27,9 @@ This option allows to inter connect the relays which will make sure that only on
 * `temperature_precision`: Controls the precision of `temperature` values,
 e.g. `0`, `1` or `2`; default `2`.
 To control the precision based on the temperature value set it to e.g. `{30: 0, 10: 1}`,
-when temperature >= 30 precision will be 0, when temperature >= 10 precision will be 1.
+when temperature >= 30 precision will be 0, when temperature >= 10 precision will be 1. Precision will take into affect with next report of device.
 * `temperature_calibration`: Allows to manually calibrate temperature values,
-e.g. `1` would add 1 degree to the temperature reported by the device; default `0`.
+e.g. `1` would add 1 degree to the temperature reported by the device; default `0`. Calibration will take into affect with next report of device.
 
 
 
@@ -45,8 +45,7 @@ The unit of this value is `W`.
 ### Energy (numeric)
 Sum of consumed energy.
 Value can be found in the published state on the `energy` property.
-To read (`/get`) the value publish a message to topic `zigbee2mqtt/FRIENDLY_NAME/get` with payload `{"energy": ""}`.
-It's not possible to write (`/set`) this value.
+It's not possible to read (`/get`) or write (`/set`) this value.
 The unit of this value is `kWh`.
 
 ### Temperature (numeric)
@@ -58,8 +57,7 @@ The unit of this value is `°C`.
 ### Voltage (numeric)
 Measured electrical potential value.
 Value can be found in the published state on the `voltage` property.
-To read (`/get`) the value publish a message to topic `zigbee2mqtt/FRIENDLY_NAME/get` with payload `{"voltage": ""}`.
-It's not possible to write (`/set`) this value.
+It's not possible to read (`/get`) or write (`/set`) this value.
 The unit of this value is `V`.
 
 ### Switch (l1 endpoint)
@@ -97,33 +95,33 @@ sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "W"
     value_template: "{{ value_json.power }}"
-    icon: "mdi:flash"
+    unit_of_measurement: "W"
+    device_class: "power"
 
 sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "kWh"
     value_template: "{{ value_json.energy }}"
-    icon: "mdi:power-plug"
+    unit_of_measurement: "kWh"
+    device_class: "energy"
 
 sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "°C"
     value_template: "{{ value_json.temperature }}"
+    unit_of_measurement: "°C"
     device_class: "temperature"
 
 sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "V"
     value_template: "{{ value_json.voltage }}"
-    icon: "mdi:alpha-v"
+    unit_of_measurement: "V"
+    device_class: "voltage"
 
 switch:
   - platform: "mqtt"
@@ -155,8 +153,8 @@ sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "lqi"
     value_template: "{{ value_json.linkquality }}"
+    unit_of_measurement: "lqi"
     icon: "mdi:signal"
 ```
 {% endraw %}

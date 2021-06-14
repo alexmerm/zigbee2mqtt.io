@@ -20,7 +20,7 @@ description: "Integrate your ADEO HR-C99C-Z-C045 via Zigbee2MQTT with whatever s
 
 ### Pairing
 Hold small reset button pressed (located on the backside of remote) for 3
-seconds (until the front LED blicks) and device will reset and will attempt to join network.
+seconds (until the front LED blinks) and device will reset and will attempt to join network.
 
 ### Device type specific configuration
 *[How to use device type specific configuration](../information/configuration.md)*
@@ -70,8 +70,8 @@ sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "%"
     value_template: "{{ value_json.battery }}"
+    unit_of_measurement: "%"
     device_class: "battery"
 
 sensor:
@@ -85,8 +85,8 @@ sensor:
   - platform: "mqtt"
     state_topic: "zigbee2mqtt/<FRIENDLY_NAME>"
     availability_topic: "zigbee2mqtt/bridge/state"
-    unit_of_measurement: "lqi"
     value_template: "{{ value_json.linkquality }}"
+    unit_of_measurement: "lqi"
     icon: "mdi:signal"
 ```
 {% endraw %}

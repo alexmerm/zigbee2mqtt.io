@@ -10,6 +10,7 @@
 - [I read that Zigbee2MQTT has a limit of 20 devices (when using a CC2531), is this true?](#i-read-that-zigbee2mqtt-has-a-limit-of-20-devices-when-using-a-cc2531-is-this-true)
 - [Which port should I use for CC26X2R1/CC1352P-2, /dev/ttyACM0 or /dev/ttyACM1?](#which-port-should-i-use-for-cc26x2r1cc1352p-2-devttyacm0-or-devttyacm1)
 - [Common error codes](#common-error-codes)
+- [How do I run multiple instances of Zigbee2MQTT?](#how-do-i-run-multiple-instances-of-zigbee2mqtt)
 
 ## Why does my device not or fail to pair?
 This problem can be divided in 2 categories; no logging is shown at all OR interview fails.
@@ -84,6 +85,11 @@ You **don't** need to re-pair your devices when:
 ## Help, Zigbee2MQTT fails to start!
 Most of the times this is caused by zigbee-herdsman not being able to communicate with your adapter (e.g. CC2531).
 
+### Error: SRSP - SYS - ping after 6000ms
+2 common reasons of this error:
+1. The port of your serial adapter changed. Check [this](../getting_started/running_zigbee2mqtt.md#1-determine-location-of-the-adapter-and-checking-user-permissions) to find out the port of your adapter.
+2. If you are using a CC2530 or CC2531; it is a common issue for this adapter to crash (due to its outdated hardware). Reflashing the firmware should fix the problem. If it happens often consider upgrading to a [more powerful adapter](../getting_started/what_do_i_need.md#supported-zigbee-adapter).
+
 ### Verify that you put the correct port in configuration.yaml
 Execute the following command to find out the correct path:
 ```bash
@@ -97,9 +103,13 @@ In this example the correct `port` would be `/dev/ttyACM0`.
 ### Verify that the user you run Zigbee2MQTT as has write access to the port
 This can be tested by executing: `test -w [PORT] && echo success || echo failure` (e.g. `test -w /dev/ttyACM0 && echo success || echo failure`).
 
-If it outputs `failure`. Assign write acces by executing: `sudo chown [USER] [PORT]` (e.g. `sudo chown pi /dev/ttyACM0`).
+If it outputs `failure` it could mean your user does not have access to the port. To test assign write acces by executing: `sudo chown [USER] [PORT]` (e.g. `sudo chown pi /dev/ttyACM0`).
 
-You need to apply this on every reboot. To fix this you can use a 'udev' rule:
+if it outputs `failure`, then you need to permanently give your user permission to the device.
+
+#### Method 1: Give your user permissions on every reboot. ####
+
+You can create a 'udev' rule yo give your user permissions after every reboot:
 
 1. `udevadm info -a -n /dev/ttyACM0 | grep 'serial'`
 get the serial to your device `YOURSERIAL`
@@ -120,6 +130,24 @@ serial:
 
 After reboot your dedvice will have the right permissions and always the same name.
 
+#### Method 2: Add your user to specific groups ####
+
+As mentioned on https://github.com/esp8266/source-code-examples/issues/26 , depending on your linux installation, various groups could have ownership of the device.
+
+Add your user to the `uucp ` ,  `tty `  ,  `dialout `   groups:
+
+```
+sudo usermod -a -G uucp $USER
+sudo usermod -a -G tty $USER
+sudo usermod -a -G dialout $USER
+```
+Reboot your device and now your user should have access to the device.
+
+### Error: `Coordinator failed to start, probably the panID is already in use, try a different panID or channel`
+- In case you are migrating from another adapter see: [How do I migrate from a CC2531 to a more powerful coordinator (e.g. ZZH)?](#how-do-i-migrate-from-a-cc2531-to-a-more-powerful-coordinator-eg-zzh)
+- If you still get this error after increasing the panID and you are using a Raspberry Pi with other USB devices attached (e.g. SSD) try connecting the SSD or adapter through a powered USB hub.
+- In case you are getting this after first starting successfully and pairing a device it might be that the firmware has been flashed incorrectly. Try flashing the stick on a different computer ([detailed info](https://github.com/Koenkk/zigbee2mqtt/issues/6302)).
+
 ### Error: `Resource temporarily unavailable Cannot lock port`
 This error occurs when another program is already using (and thus locking) the adapter. You can find out which via the following command: `ls -l /proc/[0-9]/fd/ |grep /dev/ttyACM0` (replace `/dev/ttyACM0` with your adapter port).
 
@@ -138,7 +166,7 @@ In case you see message like below when running `dmesg -w` you are using a bad p
 When you have a SSD connected to the Pi, try connecting the adapter via a powered USB hub.
 
 ### Make sure the extension cable works
-A bad extension cable can lead to connection issues between the system and the adpater.
+A bad extension cable can lead to connection issues between the system and the adapter.
 Symptoms of this are disconnection messages in the `dmesg -w` log like below.
 
 ```
@@ -208,3 +236,6 @@ The device with id ending with *if00* is for device data. Use this port in your 
 A list of common error codes and what to do in case of them:
 - `MAC_CHANNEL_ACCESS_FAILURE`: this happens when the wireless spectrum is too occupied. Mostly happens when a microwave is on or when there are WiFi networks on the same channel. See [Reduce Wifi interference by changing the Zigbee channel](../how_tos/how_to_improve_network_range_and_stability.md#reduce-wifi-interference-by-changing-the-zigbee-channel) how to fix this.
 - `NWK_TABLE_FULL`: [reported](https://github.com/Koenkk/zigbee2mqtt/issues/4964#issuecomment-757022560) to have same root cause as the above `MAC_CHANNEL_ACCESS_FAILURE`
+
+## How do I run multiple instances of Zigbee2MQTT?
+In case you setup multiple instances of Zigbee2MQTT it's important to use a different `base_topic` and `channel`. This can be configured in the [`configuration.yaml`](./configuration.md).
